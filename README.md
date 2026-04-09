@@ -37,6 +37,7 @@
 - 默认产出完整内容目录，不只是一段正文
 - 明确禁用一些模板味很重的句式
 - 把前 20 篇文章沉淀成题型模板，而不是只抓语气
+- 补了一套抖音 / 小红书发布安全边界，写完还能顺手过一遍平台风险
 
 ## 明确约束
 
@@ -46,7 +47,12 @@ Skill 内已经写入这些硬规则：
 - 不要写：`不是xxx，而是xxx`
 - 不要写：`很多人以为xxx，其实xxx`
 - 不要写：`我现在越来越觉得xxx`
+- 不要写：`我这两天xxxx的时候，第一反应xx：xxxx`
+- 不要写：`xx真的xx`
 - 不要写：`这个项目真正值钱的地方`
+
+另外，这个 Skill 也把 `真的、太、非常、特别` 这类高频强化词纳入了“谨慎使用”范围。
+它们不是完全不能用，但不能靠重复抬语气来撑内容。
 
 ## 项目结构
 
@@ -61,7 +67,8 @@ yu-article-skill/
 ├─ references/
 │  ├─ account-context.md
 │  ├─ article-archetypes.md
-│  └─ style-rules.md
+│  ├─ style-rules.md
+│  └─ platform-safety.md
 └─ examples/
    └─ prompt-examples.md
 ```
@@ -72,6 +79,7 @@ yu-article-skill/
 - `references/account-context.md`：账号定位、人设、目标用户、内容支柱
 - `references/style-rules.md`：写作硬规则、禁用表达、自检清单
 - `references/article-archetypes.md`：从前 20 篇文章提炼出的题型模板
+- `references/platform-safety.md`：抖音 / 小红书高风险内容边界，发布前自检用
 - `agents/openai.yaml`：Skill 的界面元数据
 - `examples/prompt-examples.md`：实际调用这个 Skill 时可直接复用的提示词示例
 
