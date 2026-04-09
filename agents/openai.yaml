@@ -1,0 +1,4 @@
+interface:
+  display_name: "Article Style Skill"
+  short_description: "Write AI coding content in an established article style"
+  default_prompt: "Write this in the established house style: direct, concise, conversational, conclusion-first, and free of banned sentence patterns."
