@@ -83,6 +83,8 @@ yu-article-skill/
 - `agents/openai.yaml`：Skill 的界面元数据
 - `examples/prompt-examples.md`：实际调用这个 Skill 时可直接复用的提示词示例
 
+另外，`纯正文.md` 默认按“可直接复制发布”处理，不混入 Markdown 标记符号，避免复制到平台后台后还要手动清理。
+
 ## 适合怎么用
 
 ### 1. 写一整套内容目录
