@@ -1,0 +1,4 @@
+interface:
+  display_name: "Content Production Skill"
+  short_description: "Plan and generate 长文、图文、视频内容产物 with consistent style and structured outputs"
+  default_prompt: "Use this skill to plan the topic, confirm the output form, then generate the matching content artifacts for 长文、图文、视频. If the output form is missing, ask the user to choose before continuing."
