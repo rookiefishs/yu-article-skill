@@ -87,16 +87,19 @@ description: Create content production outputs for 长文、图文、视频 in a
 - `DESIGN.md`
 - `标题-大纲.md`
 - `标题-配音文件.md`
+- `标题-配音.mp3`（通过脚本生成）
 - `素材文件/`
 - `视频工程/`
 
 具体写法、排版与约束见：
 - `references/output-video.md`
 - `references/video-assets-rules.md`
+- `references/tts-rules.md`
 
 ## Reference navigation
 
 按需要读取这些文件：
+- `references/tts-rules.md`：TTS 配音规范（SSML 标签、多音字、停顿、脚本用法）
 - `references/output-longform.md`：长文规则
 - `references/output-graphic-post.md`：图文规则
 - `references/output-video.md`：视频规则
