@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026/04/22
+
+- Docs: 新增 `references/tts-rules.md`，包含 TTS 语音模型推荐、SSML 多音字与停顿标签规范、配音文案文件结构说明。
+- Feat: 新增 `scripts/tts-generate.js`，支持从配音文件分段生成音频、合并音频、直接合并到视频。
+- Refactor: `references/illustration-prompt-rules.md` 区分图文/长文配图数量规则，更新提示词格式为固定引导语加段落原文。
+- Refactor: `references/output-graphic-post.md` 调整段落字数要求为 5 句左右，更新排版规则，配图改为图文每段一图。
+- Feat: `references/output-video.md` 配音文件要求补充 SSML 标签说明，新增 TTS 音频生成章节与脚本用法。
+- Docs: `references/output-longform.md` 排版补充段落序号规则。
+- Docs: `skill/SKILL.md` 新增 `tts-rules.md` 引用与配音 mp3 产物说明。
+
 ## 2026/04/15
 
 - Refactor: 将 skill 本体整体收口到 `skill/` 目录，根目录改为工作区说明，不再混放打包文件与工作区文档。
