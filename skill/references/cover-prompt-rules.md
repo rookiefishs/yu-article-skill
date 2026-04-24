@@ -4,7 +4,7 @@
 封面提示词是给整篇内容做封面图，不是给正文段落做辅助插图。
 
 ## 默认参考资源
-- `assets/cover-reference/封面图.png`
+- `assets/cover-reference/封面参考图.png`
 
 ## 文件位置
 - 图文场景下，封面提示词只放在 `配图提示词/封面提示词.md`

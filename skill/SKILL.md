@@ -81,7 +81,8 @@ description: Create content production outputs for 长文、图文、视频 in a
   - `01-配图提示词.md`
   - `02-配图提示词.md`
   - `...`
-  - `参考图.png`
+  - `配图参考图.png`
+  - `封面参考图.png`
 - `image/`
 
 具体写法、排版与约束见：
