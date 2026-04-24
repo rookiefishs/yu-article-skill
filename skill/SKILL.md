@@ -75,8 +75,8 @@ description: Create content production outputs for 长文、图文、视频 in a
 
 默认产物：
 - `标题-正文.md`
-- `标题-封面提示词.md`
 - `配图提示词/`
+  - `封面提示词.md`
   - `01-配图提示词.md`
   - `02-配图提示词.md`
   - `...`
