@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026/05/06
+
+- Docs: 收紧图文正文表达约束，新增每段 4 到 5 行的节奏要求，减少空泛判断句式与重复辨析表达。
+- Docs: 在 `references/output-graphic-post.md` 与 `references/style-rules.md` 中补充禁用表达，包括 `xx值得xx`、`xx清楚xx`、`xx更稳xx`、`xx划算xx` 等写法，统一后续图文稿件口径。
+
 ## 2026/04/25
 
 - Assets: 图文参考图资源拆分为 `配图参考图.png` 与 `封面参考图.png`，同步替换旧的 `参考图.png` 与 `封面图.png` 命名，并更新相关规则与示例引用。
