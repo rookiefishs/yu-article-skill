@@ -1,6 +1,6 @@
 ---
 name: yu-article-skill
-description: Create content production outputs for 长文、图文、视频 in a consistent AI 编程内容风格. Use when the user wants topic planning, preview drafting, 正文 writing, 封面提示词, 配图提示词, 视频大纲, 配音文本, or structured content directories. If the user has not specified the output form, ask them to choose 长文、图文、视频 before continuing. If the user chooses 视频 but has not specified the visual design direction, ask first before generating video outputs.
+description: Create content production outputs for 长文、图文、视频 in a consistent AI 编程内容风格. Use when the user wants topic planning, preview drafting, 正文 writing, 封面提示词, 配图提示词, 视频大纲, 配音文本, or structured content directories. If the user has not specified the output form, default to 长文. If the user chooses 视频 but has not specified the visual design direction, ask first before generating video outputs. When the user provides a short-video share link or copied share text, first read the visible/shared video information, then search the web for related materials, and then generate content in the requested output form.
 ---
 
 # yu-article-skill
@@ -27,25 +27,43 @@ description: Create content production outputs for 长文、图文、视频 in a
 
 这几条是硬规则，不能跳：
 
-1. 如果用户没明确说输出形式是 `长文 / 图文 / 视频`，先问清楚，再继续。
+1. 如果用户没明确说输出形式是 `长文 / 图文 / 视频`，默认按 `长文` 继续，不再反复追问。
 2. 如果用户要做视频，但没明确视频样式方向，先问清楚，再继续。
 3. 如果用户说视频“用默认”，再读取 `assets/design-default/DESIGN.md`。
 4. 如果用户要图文，且内容需要配图，默认补 `配图提示词/` 目录，封面提示词放在 `配图提示词/封面提示词.md`，所有正文配图提示词合并到一个 `配图提示词/配图提示词.md`，不要再额外保留根目录 `标题-封面提示词.md`。
 5. 如果用户要长文，且内容需要配图，默认补 `标题-配图提示词.md`。
 6. 不要默认补 `README.md`、`标题-发布文案.md`、`标题-长文.md`、`标题-纯正文.md` 这类旧产物。
+7. 如果用户粘贴短视频分享链接或复制分享文案，先阅读分享文案和公开页面能看到的视频信息，再联网搜索相关背景资料，最后按用户指定形式生成内容；如果用户没有指定形式，默认生成长文。
 
 ## Workflow
 
 按这个顺序执行：
-1. 主题标题
-2. 内容 / 大纲确定
-3. 生成预览版本
-4. 获取输出形式
-5. 生成对应目录
-6. 如果是视频，询问用户是否现在开始制作
+1. 接收主题、标题、链接、视频分享文案或已有素材
+2. 如果包含视频分享链接，先解析分享文案和链接中的公开信息
+3. 尝试读取公开视频页面可见内容，包括标题、简介、标签、作者、页面文本和公开结构化信息
+4. 如果视频页面信息不足，根据标题、简介、标签和关键词联网搜索相关资料
+5. 整理主题标题
+6. 内容 / 大纲确定
+7. 生成预览版本
+8. 获取输出形式；如果用户未指定，默认使用长文
+9. 生成对应目录
+10. 如果是视频，询问用户是否现在开始制作
 
 不要跳步骤。
-不要在没确认输出形式时直接生成最终目录。
+用户没有指定输出形式时，可以按默认长文生成最终目录。
+
+## Short-video share link workflow
+
+当用户粘贴抖音、TikTok、小红书、B站或其他短视频分享链接时，先按这个流程处理：
+
+1. 先读取用户复制出来的分享文案，提取标题、简介、话题标签、作者信息、短链和用户额外要求。
+2. 打开短链或公开页面，读取页面可见信息；能看到什么就用什么，不假装拿到了完整口播。
+3. 优先提取公开视频页面里的标题、描述、标签、发布时间、作者、页面文本和公开结构化数据。
+4. 如果视频没有公开字幕或页面限制访问，就把“已确认的信息”和“无法确认的信息”分开。
+5. 根据视频标题、标签、工具名、项目名、关键词联网搜索更多资料，优先查官方文档、GitHub、项目主页、可信教程和更新日志。
+6. 不直接搬运原视频顺序和原句，而是把视频方向、公开信息和联网资料重新组织成适合账号风格的内容。
+7. 根据用户指定的 `长文 / 图文 / 视频` 继续生成；如果用户没指定，默认按 `长文` 生成。
+8. 生成前仍然遵守当前形式的正文、封面、配图、视频和平台安全规则。
 
 ## Directory naming rules
 
