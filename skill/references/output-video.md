@@ -88,9 +88,33 @@ node scripts/tts-generate.js --input 标题-配音文件.md --output 标题-配�
 - 本 skill 当前阶段先负责把内容和结构准备好
 - 是否现在开始制作视频，要继续问用户
 
+## SCENES 字段规范
+
+每个场景必须包含以下字段：
+
+| 字段 | 说明 | 约束 |
+|------|------|------|
+| title | 主标题 | ≤8 个字，不要用 
+ 换行 |
+| accent | 副标题 | ≤15 个字 |
+| caption | 底部金句 | ≤20 个字，每页不同 |
+| voice | 配音文案 | 口语化，8-15秒时长 |
+| kind | 场景类型 | intro-cover / hook / hero / terminal / checklist / warning / closing |
+| series | 系列名称 | 所有页面统一，显示在 meta-bar 左侧 |
+| kicker | 分类标签 | ≤4 个字，显示在 meta-bar 下方 |
+
+## 音频参数规范
+
+渲染时 ffmpeg 必须使用以下音频滤镜：
+```
+-af volume=12dB,aresample=44100,aformat=channel_layouts=stereo
+```
+原因：edge-tts 默认输出 24kHz mono MP3，直接编码为 AAC 会导致部分播放器无法解码。必须先升采样到 44.1kHz stereo 再编码。
+
 ## 视频模板快速启动
 1. 复制 `assets/video-template/` 到 `视频工程/`
-2. 修改 `build_hyperframes_video.py` 中的 `SCENES` 数组
+2. 修改 `build_hyperframes_video.py` 中的 `SCENES` 数组（每个场景必须有 `series` 和 `kicker` 字段）
 3. 把配图放到 `../image/` 目录（从 `2.png` 开始）
 4. 运行 `python build_hyperframes_video.py` 生成 HTML 和音频
-5. 运行 `node render_with_puppeteer.js` 渲染视频，成品会输出到文章根目录：`当前主题.mp4`
+5. 确认 `render_with_puppeteer.js` 中 ffmpeg 命令包含音频滤镜：`-af volume=12dB,aresample=44100,aformat=channel_layouts=stereo`
+6. 运行 `node render_with_puppeteer.js` 渲染视频，成品会输出到文章根目录：`当前主题.mp4`

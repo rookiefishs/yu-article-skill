@@ -28,11 +28,13 @@
 
 ```python
 {
-    'title': '主标题\n可换行',      # 大标题，支持 \n 换行，最多2行
-    'accent': '副标题',              # 标题下方的补充说明
-    'caption': '底部字幕',           # 底部强调句，每页不同
+    'title': '主标题',               # 大标题，必须 ≤8 个字，不要换行
+    'accent': '副标题',              # 标题下方的补充说明，≤15 个字
+    'caption': '底部字幕',           # 底部强调句，每页不同，≤20 个字
     'voice': '配音内容',             # 这一页的旁白文案
     'kind': 'hook',                  # 场景类型，决定卡片样式
+    'series': '系列名',              # meta-bar 左侧显示的系列名称
+    'kicker': '标签',                # meta-bar 下方的分类标签，≤4 个字
 }
 ```
 
@@ -43,6 +45,10 @@
 3. **配音节奏**：每页配音控制在 8-15 秒
 4. **caption 不重复**：底部字幕每页不同，是核心金句
 5. **kind 只影响局部**：`kind` 主要影响卡片内部样式，不要改整页结构
+6. **标题 ≤8 字**：title 必须控制在 8 个字以内，避免大字号下换行挤压内容
+7. **accent ≤15 字**：副标题简洁说明，不要过长
+8. **kicker ≤4 字**：分类标签精简，如"技巧一""避坑""核心"等
+9. **series 统一**：meta-bar 系列名所有页面保持一致
 
 ## 第二步：配音文案
 
@@ -64,10 +70,13 @@
 ### 画布尺寸
 - 固定：1080 x 1920（竖屏 9:16）
 
-### 安全区
-- 左右边距：108px
+### 安全区（已适配抖音 UI 遮挡）
+- 左右边距：150px（含抖音右侧头像/点赞/评论区遮挡）
 - 顶部安全区：76px（meta-bar）
-- 底部安全区：224px（caption）+ 160px（progress-bar）
+- 底部安全区：500px（caption + progress + 抖音底部评论/分享栏）
+- 配图区域边距：左右 140px
+- caption 区域：左右 140px，底部 240px
+- progress 区域：左右 140px，底部 170px
 - 抖音遮挡区：底部约 200px，右侧约 100px
 
 ### 默认颜色主题（温暖纸感 editorial）
@@ -77,8 +86,13 @@
 文字副色：#5e5d59
 强调色：#c96442
 辅助强调：#d97757
-页面壳：半透明暖白 + 轻边框 + 柔和阴影
+页面壳：半透明暖白 + 极淡边框 + 柔和双层阴影
 ```
+
+### 卡片与容器样式规范
+- scene-shell：`border: 1px solid rgba(118,180,224,.08)`，`box-shadow: 0 8px 32px rgba(88,134,171,.18), 0 2px 8px rgba(88,134,171,.08)`
+- visual-frame：`border: 1px solid rgba(118,180,224,.06)`，`box-shadow: 0 6px 24px rgba(88,134,171,.20), 0 2px 8px rgba(88,134,171,.10)`
+- 原则：边框尽量淡（opacity ≤ 0.08），阴影用双层（远景+近景）营造柔和立体感
 
 ### 字体
 - 标题：Microsoft YaHei, 86px, weight 900
@@ -94,16 +108,21 @@
 │  整页不透明背景             │
 │  ┌──────────────────────┐  │
 │  │   scene-shell        │  │
-│  │  meta-bar            │  │
-│  │  kicker              │  │
-│  │  title               │  │
-│  │  accent              │  │
+│  │  meta-bar            │  │  ← 左: series（系列名）右: 页码
+│  │  kicker              │  │  ← 分类标签（≤4字）
+│  │  title               │  │  ← 主标题（≤8字）
+│  │  accent              │  │  ← 副标题（≤15字）
 │  │  card / visual       │  │
-│  │  bottom-caption      │  │
+│  │  bottom-caption      │  │  ← 底部金句
 │  │  progress-shell      │  │
 │  └──────────────────────┘  │
 └────────────────────────────┘
 ```
+
+### meta-bar 规范
+- 左侧 `meta-pill`：显示系列名称（如"Codex工作流""AI 编程技巧"），所有页面统一
+- 右侧 `meta-index`：显示页码，格式 `01/07`
+- 不要使用默认的"视频主题"作为 series 值
 
 ### 配图规则
 - 配图页使用固定视觉容器
@@ -120,9 +139,10 @@
 - 不再默认使用内容替换式切换、clip-path 开页、shutter bar 遮挡条作为主过渡
 
 ### 页面进入动画
-- 首个正文页：轻微 blur + fade 进入
+- 首个正文页：轻微 blur + fade 进入，enterAt 设为 1.7s（避免与 intro-cover 淡出产生空白帧闪烁）
 - 后续正文页：从右向左整体滑入
 - 进入时长：约 0.34 秒
+- 关键代码：`const enterAt = idx === 0 ? Math.max(1.7, s + 0.02) : s + 0.18;`
 
 ### 页面退出动画
 - 当前页整体向左推出
@@ -152,7 +172,9 @@
 - FPS: 24
 - 画质: JPEG quality 92, CRF 20
 - 视频编码: libx264, medium preset
-- 音频编码: AAC, 192kbps
+- 音频参数：`-af volume=12dB,aresample=44100,aformat=channel_layouts=stereo`
+- 音频编码: AAC, 192kbps, 44.1kHz, stereo
+- 注意：必须使用 `-af` 滤镜将 24kHz mono 升级为 44.1kHz stereo，否则部分播放器无法解码
 
 ### 输出文件
 - `../当前主题.mp4`: 最终视频，直接放文章文件夹根目录
@@ -179,12 +201,17 @@
 - [ ] 拆分 SCENES（5-8 页）
 - [ ] 确认每页只讲一个点
 - [ ] 保持所有正文页使用统一页面骨架
+- [ ] **检查所有 title ≤8 字、accent ≤15 字、kicker ≤4 字**
+- [ ] **确认每个场景都有 `series` 和 `kicker` 字段**
 - [ ] 写配音文案（口语化，8-15秒/页）
 - [ ] 将 `DESIGN.md`、`*-大纲.md`、`*-配音文件.md` 放入 `素材文件/`
 - [ ] 准备配图（从 image/2.png 开始，不含封面）
 - [ ] 检查 caption 是否每页不同
 - [ ] 运行 `python build_hyperframes_video.py`
+- [ ] **确认 render 脚本中 ffmpeg 有 `-af volume=12dB,aresample=44100,aformat=channel_layouts=stereo`**
 - [ ] 运行 `node render_with_puppeteer.js`
 - [ ] 确认最终视频已输出到文章根目录，并命名为 `当前主题.mp4`
 - [ ] 验证换页是否为整页覆盖式过渡
 - [ ] 验证页面风格是否全程一致
+- [ ] **播放验证音频是否正常（44.1kHz stereo）**
+- [ ] **验证开头无闪烁（intro-cover → scene-1 过渡平滑）**
