@@ -107,12 +107,13 @@ description: Create content production outputs for 长文、图文、视频 in a
 ### 视频
 
 默认产物：
-- `DESIGN.md`
-- `标题-大纲.md`
-- `标题-配音文件.md`
-- `标题-配音.mp3`（通过脚本生成）
 - `素材文件/`
+  - `DESIGN.md`
+  - `标题-大纲.md`
+  - `标题-配音文件.md`
+  - `标题-配音.mp3`（通过脚本生成）
 - `视频工程/`
+- `标题.mp4`（最终成品视频，直接放文章文件夹根目录）
 
 具体写法、排版与约束见：
 - `references/output-video.md`
@@ -122,6 +123,7 @@ description: Create content production outputs for 长文、图文、视频 in a
 ## Reference navigation
 
 按需要读取这些文件：
+- `references/video-production-workflow.md`：视频生产完整流程（拆页、排版、动画、渲染）
 - `references/tts-rules.md`：TTS 配音规范（SSML 标签、多音字、停顿、脚本用法）
 - `references/output-longform.md`：长文规则
 - `references/output-graphic-post.md`：图文规则
