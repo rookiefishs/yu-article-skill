@@ -1,54 +1,51 @@
-﻿# 视频模板工程
+# 视频模板工程
 
 ## 使用方法
-
-1. 复制整个 `video-template` 目录到新视频项目
+1. 复制整个 `video-template` 目录到新视频项目的 `视频工程/`
 2. 修改 `build_hyperframes_video.py` 中的 `SCENES` 数组
-3. 修改封面和场景内容
-4. 准备配图到 `../image/` 目录（从 `2.png` 开始）
-5. 运行生成脚本，最终视频会输出到文章目录根目录
+3. 准备 `../image/` 中的配图素材
+4. 先生成 HTML 和音频
+5. 先导出 4 秒预览确认视觉
+6. 预览通过后再渲染整片
 
 ## 命令流程
-
 ```bash
-# 1. 生成HTML和音频
+# 1. 生成 HTML / 元数据 / 整条旁白
 python build_hyperframes_video.py
 
-# 2. 渲染视频
+# 2. 先导出 4 秒预览
+PREVIEW_SECONDS=4 node render_with_puppeteer.js
+
+# 3. 预览通过后渲染整片
 node render_with_puppeteer.js
 ```
 
+Windows PowerShell：
+```powershell
+python build_hyperframes_video.py
+$env:PREVIEW_SECONDS='4'
+node render_with_puppeteer.js
+Remove-Item Env:PREVIEW_SECONDS
+node render_with_puppeteer.js
+```
+
+## 默认视觉规范
+- 1080x1920，24fps
+- 主体卡片整体边距：100px
+- 浅色简约
+- 浅蓝主色，浅紫辅助
+- 整页滑动覆盖转场
+- 主体卡片、图片框、底部字幕条统一风格
+
 ## 文件说明
-
-- `build_hyperframes_video.py`: 主构建脚本，生成HTML和音频
-- `render_with_puppeteer.js`: Puppeteer渲染脚本，截帧合成视频
-- `index.html`: 生成的视频页面（自动更新）
-- `build_meta.json`: 场景元数据（自动生成）
-- `assets/gsap.min.js`: GSAP动画库（需要手动放置）
-- `assets/narration.mp3`: 合并后的音频（自动生成）
-- `../当前主题.mp4`: 最终视频，直接放文章文件夹根目录
-- `renders/output-video.mp4`: 兼容/中间输出，不作为默认交付位置
-
-## 配图要求
-
-- 封面页面不显示配图
-- 从第二个场景开始使用配图
-- 配图文件放在上级目录的 `image/` 文件夹
-- 文件命名：`2.png`, `3.png`, `4.png`...
-- 建议尺寸：1080x720 或类似比例
-
-## 自定义
-
-修改 `SCENES` 数组中的以下字段：
-- `title`: 场景标题（支持换行）
-- `accent`: 副标题
-- `caption`: 底部字幕
-- `voice`: 配音文本
-- `kind`: 场景类型（hook/terminal/checklist等）
+- `build_hyperframes_video.py`：生成 HTML、元数据、整条旁白
+- `render_with_puppeteer.js`：导出预览或整片
+- `build_meta.json`：场景元数据
+- `assets/narration.mp3`：整条旁白音频
+- `renders/preview-4s.mp4`：4 秒预览
+- `../当前主题.mp4`：最终成片
 
 ## 注意事项
-
-- 需要安装 Node.js 和 Python
-- 需要安装 puppeteer-core 和 edge-tts
-- 需要安装 ffmpeg
-- GSAP库需要手动下载放到 assets 目录
+- `assets/gsap.min.js` 需要手动放置
+- 预览阶段默认先看 4 秒，不要一开始直接整片渲染
+- 如果用户没有指定新样式，直接沿用 skill 默认视频规范

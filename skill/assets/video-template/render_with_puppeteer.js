@@ -18,11 +18,14 @@ const WIDTH = 1080;
 const HEIGHT = 1920;
 const META = JSON.parse(fs.readFileSync(path.join(ROOT, 'build_meta.json'), 'utf8'));
 const TOTAL = META.total_duration;
-const FRAME_COUNT = Math.ceil(TOTAL * FPS);
+const PREVIEW_SECONDS = Number(process.env.PREVIEW_SECONDS || 0);
+const RENDER_SECONDS = PREVIEW_SECONDS > 0 ? Math.min(TOTAL, PREVIEW_SECONDS) : TOTAL;
+const FRAME_COUNT = Math.ceil(RENDER_SECONDS * FPS);
 const FRAMES_DIR = path.join(ROOT, 'renders', 'frames');
 const OUTPUT_DIR = path.join(ROOT, 'renders');
 const FINAL_MP4 = path.join(ARTICLE_ROOT, `${topicFromDir(ARTICLE_ROOT)}.mp4`);
 const COMPAT_OUTPUT_MP4 = path.join(OUTPUT_DIR, 'output-video.mp4');
+const PREVIEW_MP4 = path.join(OUTPUT_DIR, `preview-${String(RENDER_SECONDS).replace('.', '_')}s.mp4`);
 const OUTPUT_PREVIEW = path.join(OUTPUT_DIR, 'preview-frame-001.jpg');
 const AUDIO = path.join(ROOT, 'assets', 'narration.mp3');
 const INDEX = `file:///${path.join(ROOT, 'index.html').replace(/\\/g, '/')}`;
@@ -44,7 +47,7 @@ const INDEX = `file:///${path.join(ROOT, 'index.html').replace(/\\/g, '/')}`;
   await page.setCacheEnabled(false);
   await page.goto(`${INDEX}?v=${Date.now()}`, { waitUntil: 'load', timeout: 60000 });
   for (let i = 0; i < FRAME_COUNT; i++) {
-    const t = Math.min(TOTAL - 0.001, i / FPS + (i === 0 ? 0.001 : 0));
+    const t = Math.min(RENDER_SECONDS - 0.001, i / FPS + (i === 0 ? 0.001 : 0));
     await page.evaluate((tt) => {
       window.__hfSeek(tt);
     }, t);
@@ -58,6 +61,7 @@ const INDEX = `file:///${path.join(ROOT, 'index.html').replace(/\\/g, '/')}`;
   }
   await browser.close();
 
+  const targetOutput = PREVIEW_SECONDS > 0 ? PREVIEW_MP4 : FINAL_MP4;
   execFileSync('ffmpeg', [
     '-y',
     '-framerate', String(FPS),
@@ -70,12 +74,24 @@ const INDEX = `file:///${path.join(ROOT, 'index.html').replace(/\\/g, '/')}`;
     '-c:a', 'aac',
     '-b:a', '192k',
     '-shortest',
-    FINAL_MP4
+    targetOutput
   ], { stdio: 'inherit' });
 
-  await fsp.copyFile(FINAL_MP4, COMPAT_OUTPUT_MP4);
+  if (PREVIEW_SECONDS > 0) {
+    await fsp.copyFile(targetOutput, COMPAT_OUTPUT_MP4);
+  } else {
+    await fsp.copyFile(FINAL_MP4, COMPAT_OUTPUT_MP4);
+  }
 
-  console.log(JSON.stringify({ output: FINAL_MP4, compatOutput: COMPAT_OUTPUT_MP4, preview: OUTPUT_PREVIEW, frames: FRAME_COUNT, fps: FPS, total: TOTAL }, null, 2));
+  console.log(JSON.stringify({
+    output: targetOutput,
+    compatOutput: COMPAT_OUTPUT_MP4,
+    preview: OUTPUT_PREVIEW,
+    frames: FRAME_COUNT,
+    fps: FPS,
+    total: TOTAL,
+    renderedSeconds: RENDER_SECONDS
+  }, null, 2));
 })().catch(err => {
   console.error(err);
   process.exit(1);

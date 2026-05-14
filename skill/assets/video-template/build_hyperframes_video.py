@@ -10,18 +10,82 @@ ASSETS = ROOT / 'assets'
 ASSETS.mkdir(exist_ok=True)
 VOICE = 'zh-CN-YunyangNeural'
 RATE = '+24%'
+SCENE_GAP_SECONDS = 0.45
+PREVIEW_TRANSITION_START = 1.68
 
 # 替换为实际视频内容
 SCENES = [
     {
-        'title': '标题第一行\n标题第二行',
-        'accent': '副标题',
-        'caption': '底部字幕/重点句',
-        'voice': '配音内容，需要与标题对应。',
-        'kind': 'hook'
+        'title': '先让它读懂项目',
+        'accent': '改项目之前先读一遍',
+        'caption': '入口 目录 命令 规则 风险',
+        'voice': '用 Codex 改项目之前，先让它把项目读一遍。让它说清入口文件、目录分工、运行命令和容易改错的位置。这一轮看起来慢一点，后面能少很多误改和返工。',
+        'kind': 'intro-cover',
+        'series': 'Codex工作流',
+        'kicker': '系列',
+        'brand': 'Codex工作流',
+        'tag': '第一期',
+        'intro_kicker': '系列教程',
+        'summary': '这一轮看起来慢一点，后面能少很多误改和返工。',
+        'problem': '如果你接手的是陌生项目，这一步比直接提需求更重要。',
+        'points': ['先找项目入口', '让它讲目录分工', '补上运行命令', '写下项目规则', '标出风险位置']
     },
-    # 继续添加更多场景...
+    {
+        'title': '先找项目入口',
+        'accent': '别急着让 Codex 写功能',
+        'caption': '前端后端配置分别从哪里看',
+        'voice': '第一轮不要急着让 Codex 写功能，先让它找入口。让它说明前端从哪里启动，后端从哪里进来，配置文件放在哪里。如果是网页项目，就让它找路由、页面目录、组件目录和接口调用位置。如果是后端项目，就让它找服务入口、接口层、数据层和测试目录。这一步能帮你知道后面该把任务交给哪个范围。',
+        'kind': 'hook',
+        'series': 'Codex工作流',
+        'kicker': '核心'
+    },
+    {
+        'title': '让它讲目录分工',
+        'accent': 'AI 最容易把文件改散',
+        'caption': '目录讲清后面改动范围更稳',
+        'voice': '项目目录一多，AI 最容易把文件改散。你可以先让 Codex 用简单语言解释每个核心目录负责什么。重点看它有没有识别出页面、组件、工具函数、配置、测试和文档。如果它说不清，说明上下文还不够，先补文件路径或让它继续读取。目录分工讲清之后，后面的改动范围会更稳。',
+        'kind': 'hero',
+        'series': 'Codex工作流',
+        'kicker': '分工'
+    },
+    {
+        'title': '补上运行命令',
+        'accent': '读完代码还要知道怎么启动',
+        'caption': '每次改代码都能做最小检查',
+        'voice': 'Codex 读懂代码还不够，它还要知道怎么启动和验证。让它从 package.json、README、脚本文件或配置里找运行命令。同时让它区分开发启动、构建、测试、格式化和类型检查。如果命令跑不通，要让它记录报错和可能原因。后面每次改代码，都可以让它按这些命令做最小检查。',
+        'kind': 'terminal',
+        'series': 'Codex工作流',
+        'kicker': '命令'
+    },
+    {
+        'title': '写下项目规则',
+        'accent': '给 AI 写一份规则文件',
+        'caption': '贴近日常操作的规则最管用',
+        'voice': '项目里最好有一份给 AI 看的规则文件，比如 AGENTS.md。里面写清代码风格、测试要求、不要碰的目录、常用命令和提交习惯。这样 Codex 每次进项目，不需要你重复讲一遍规矩。规则不用写得很长，越贴近日常操作越有用。只要团队习惯变了，就顺手把这份规则更新掉。',
+        'kind': 'checklist',
+        'series': 'Codex工作流',
+        'kicker': '规则'
+    },
+    {
+        'title': '标出风险位置',
+        'accent': '标出容易出问题的位置',
+        'caption': '风险提前暴露省得改完再查',
+        'voice': '读项目时，还要让 Codex 标出容易出问题的地方。比如老代码、复杂状态、接口兼容、数据库字段、鉴权逻辑和构建脚本。这些位置可以改，但动手前要先说清影响面。如果它准备改这些文件，最好先让它给出改动理由和回滚方式。风险提前暴露，比改完再找问题省时间。',
+        'kind': 'warning',
+        'series': 'Codex工作流',
+        'kicker': '避坑'
+    },
+    {
+        'title': '读完再开任务',
+        'accent': '地基清楚了才像在项目里工作',
+        'caption': '地基搭好后面才少走弯路',
+        'voice': '当 Codex 能说清入口、目录、命令、规则和风险，再让它做具体任务。你可以让它先输出计划，再确认是否开始修改。如果计划里出现大范围重构、顺手优化、无关文件变动，要及时拦住。第一期的目标是把后面的协作地基搭好，不追求一次产出很多代码。地基清楚了，Codex 后面才更像在项目里工作。',
+        'kind': 'closing',
+        'series': 'Codex工作流',
+        'kicker': '总结'
+    }
 ]
+
 
 DESIGN = textwrap.dedent('''
 # Video Design
@@ -54,6 +118,11 @@ async def synth(scene, path):
     communicate = edge_tts.Communicate(scene['voice'], VOICE, rate=RATE)
     await communicate.save(str(path))
 
+async def synth_full_narration(scenes, path):
+    full_voice = '\n\n'.join(scene['voice'].strip() for scene in scenes if scene.get('voice'))
+    communicate = edge_tts.Communicate(full_voice, VOICE, rate=RATE)
+    await communicate.save(str(path))
+
 def ffprobe_duration(path):
     res = subprocess.run(['ffprobe','-v','error','-show_entries','format=duration','-of','default=nw=1:nk=1',str(path)], capture_output=True, text=True, check=True)
     return float(res.stdout.strip())
@@ -71,7 +140,7 @@ async def main():
         audio_files.append(p)
     for scene, p in zip(SCENES, audio_files):
         scene['audio_duration'] = ffprobe_duration(p)
-        scene['duration'] = round(scene['audio_duration'] + 0.45, 2)
+        scene['duration'] = round(scene['audio_duration'] + SCENE_GAP_SECONDS, 2)
     overlap = 0.55
     starts = []
     t = 0.0
@@ -82,10 +151,8 @@ async def main():
         else:
             t += scene['duration']
     total = round(t + 0.4, 2)
-    concat = ASSETS / 'concat.txt'
-    concat.write_text(''.join([f"file '{p.as_posix()}'\n" for p in audio_files]), encoding='utf-8')
     narration = ASSETS / 'narration.mp3'
-    subprocess.run(['ffmpeg','-y','-f','concat','-safe','0','-i',str(concat),'-c','copy',str(narration)], check=True)
+    await synth_full_narration(SCENES, narration)
 
     html = build_html(SCENES, starts, total)
     (ROOT / 'index.html').write_text(html, encoding='utf-8')
@@ -181,70 +248,81 @@ def build_html(scenes, starts, total):
     <script src="./assets/gsap.min.js"></script>
     <style>
       * { margin:0; padding:0; box-sizing:border-box; }
-      html, body { width:1080px; height:1920px; overflow:hidden; background:#f5f4ed; font-family:"Microsoft YaHei","Segoe UI",sans-serif; color:#141413; }
+      html, body { width:1080px; height:1920px; overflow:hidden; background:#f4f6fb; font-family:"Microsoft YaHei","Segoe UI",sans-serif; color:#141413; }
       body { position:relative; background:
-        radial-gradient(circle at 20% 15%, rgba(145,195,255,.34), transparent 26%),
-        radial-gradient(circle at 80% 70%, rgba(136,224,199,.24), transparent 24%),
-        linear-gradient(180deg,#f5f4ed 0%,#faf9f5 42%,#f0eee6 100%); }
+        radial-gradient(circle at 18% 16%, rgba(205,193,255,.46), transparent 28%),
+        radial-gradient(circle at 82% 78%, rgba(179,225,255,.44), transparent 26%),
+        linear-gradient(180deg,#f7f8fc 0%,#eef4fb 52%,#e9f2fb 100%); }
       #root { position:relative; width:100%; height:100%; overflow:hidden; }
       .ambient { position:absolute; inset:0; width:100%; height:100%; overflow:hidden; }
       .scene { position:absolute; inset:0; width:100%; height:100%; overflow:hidden; opacity:0; visibility:hidden; transform-origin:center center; will-change:transform, opacity; background:#f5f4ed; }
       .intro-cover { position:absolute; inset:0; z-index:120; overflow:hidden; background:
-        radial-gradient(circle at 18% 22%, rgba(145,195,255,.36), transparent 28%),
-        radial-gradient(circle at 82% 78%, rgba(136,224,199,.24), transparent 24%),
-        linear-gradient(180deg,#f5f4ed 0%,#faf9f5 42%,#f0eee6 100%); }
+        radial-gradient(circle at 18% 22%, rgba(205,193,255,.42), transparent 30%),
+        radial-gradient(circle at 82% 78%, rgba(179,225,255,.38), transparent 26%),
+        linear-gradient(180deg,#f7f8fc 0%,#eef4fb 52%,#e9f2fb 100%); }
       .intro-ring, .intro-ring-two { position:absolute; border-radius:50%; border:2px solid rgba(97,157,205,.20); }
       .intro-ring { width:720px; height:720px; left:-160px; top:220px; }
       .intro-ring-two { width:520px; height:520px; right:-120px; bottom:340px; border-color:rgba(129,207,190,.22); }
-      .intro-grid { position:absolute; inset:0; background-image: linear-gradient(rgba(97,140,178,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(97,140,178,.08) 1px, transparent 1px); background-size: 84px 84px; opacity:.22; }
+      .intro-grid { position:absolute; inset:0; background-image: linear-gradient(rgba(140,160,210,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(140,160,210,.08) 1px, transparent 1px); background-size: 84px 84px; opacity:.2; }
       .intro-noise { position:absolute; inset:-20%; background:radial-gradient(circle, rgba(255,255,255,.06) 0 1px, transparent 1px); background-size: 22px 22px; opacity:.1; }
-      .intro-panel { position:absolute; left:76px; right:76px; top:92px; bottom:120px; border-radius:46px; border:2px solid rgba(118,180,224,.28); background:linear-gradient(180deg, rgba(255,255,255,.58), rgba(250,249,245,.38)); box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 24px 80px rgba(88,134,171,.14); }
-      .intro-topline { position:absolute; top:132px; left:120px; right:120px; display:flex; align-items:center; justify-content:space-between; }
+      .intro-panel { position:absolute; inset:100px; border-radius:44px; border:1px solid rgba(170,184,225,.9); background:
+        radial-gradient(circle at 16% 18%, rgba(232,220,255,.52), transparent 30%),
+        radial-gradient(circle at 82% 24%, rgba(255,228,239,.42), transparent 22%),
+        radial-gradient(circle at 84% 82%, rgba(194,230,255,.66), transparent 30%),
+        linear-gradient(135deg, rgba(247,243,255,.98) 0%, rgba(233,242,255,.96) 52%, rgba(226,237,247,.96) 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.86), 0 28px 88px rgba(112,132,186,.18); }
+      .intro-topline { position:absolute; top:154px; left:150px; right:150px; display:flex; align-items:center; justify-content:space-between; }
       .intro-brand { display:flex; align-items:center; gap:16px; padding:16px 26px; border-radius:999px; border:2px solid rgba(118,180,224,.24); background:rgba(255,255,255,.58); }
       .intro-brand-dot { width:56px; height:16px; border-radius:999px; background:linear-gradient(90deg,#c96442,#d97757,#d97757); }
       .intro-brand-text { font-size:30px; font-weight:800; letter-spacing:.5px; color:#141413; }
       .intro-tag { font-size:22px; letter-spacing:2px; color:#c96442; }
-      .intro-content { position:absolute; left:120px; right:120px; top:320px; }
+      .intro-content { position:absolute; left:156px; right:156px; top:398px; }
       .intro-kicker { font-size:28px; letter-spacing:3px; color:#c96442; margin-bottom:26px; }
-      .intro-title { font-size:112px; line-height:.98; font-weight:900; max-width:760px; color:#141413; text-shadow:none; }
-      .intro-summary { margin-top:36px; max-width:740px; font-size:34px; line-height:1.45; color:#5e5d59; }
-      .intro-callout { position:absolute; left:120px; right:120px; bottom:330px; display:grid; grid-template-columns:1.1fr .9fr; gap:24px; }
-      .intro-box { min-height:210px; padding:28px 30px; border-radius:34px; border:2px solid rgba(118,180,224,.18); background:rgba(255,255,255,.35); }
-      .intro-box strong { display:block; font-size:34px; color:#3E83AD; margin-bottom:16px; }
-      .intro-box p { font-size:28px; line-height:1.45; color:#5e5d59; }
+      .intro-title { font-size:100px; line-height:.98; font-weight:900; max-width:700px; color:#141413; text-shadow:none; }
+      .intro-summary { margin-top:28px; max-width:620px; font-size:30px; line-height:1.42; color:#5e5d59; }
+      .intro-callout { position:absolute; left:156px; right:156px; bottom:280px; display:grid; grid-template-columns:1fr; gap:18px; }
+      .intro-box { min-height:156px; padding:24px 26px; border-radius:30px; border:1px solid rgba(176,191,230,.78); background:
+        linear-gradient(135deg, rgba(239,232,255,.86) 0%, rgba(220,236,255,.88) 58%, rgba(242,235,255,.8) 100%); box-shadow:0 16px 30px rgba(112,132,186,.1), inset 0 1px 0 rgba(255,255,255,.6); }
+      .intro-box strong { display:block; font-size:30px; color:#3E83AD; margin-bottom:14px; }
+      .intro-box p { font-size:25px; line-height:1.42; color:#4f5c7a; }
       .intro-mini-list { display:flex; flex-direction:column; gap:14px; }
-      .intro-mini-list span { display:block; padding:14px 18px; border-radius:18px; background:rgba(255,255,255,.42); font-size:24px; color:#5e5d59; }
-      .ambient-line { position:absolute; left:-10%; width:120%; height:2px; background:linear-gradient(90deg, transparent, rgba(99,167,192,.7), transparent); opacity:.28; transform-origin:left center; }
-      .ambient-dot { position:absolute; width:8px; height:8px; border-radius:50%; background:#71C9BE; box-shadow:0 0 18px rgba(113,201,190,.38); opacity:.55; }
+      .intro-mini-list span { display:block; padding:12px 16px; border-radius:16px; background:linear-gradient(135deg, rgba(255,255,255,.54) 0%, rgba(241,246,255,.34) 100%); font-size:22px; color:#4f5c7a; }
+      .ambient-line { position:absolute; left:-10%; width:120%; height:2px; background:linear-gradient(90deg, transparent, rgba(152,170,227,.6), transparent); opacity:.24; transform-origin:left center; }
+      .ambient-dot { position:absolute; width:8px; height:8px; border-radius:50%; background:#9cb8ff; box-shadow:0 0 18px rgba(156,184,255,.3); opacity:.5; }
       .scene-bg { position:absolute; inset:0; }
       .scene-bg-1, .scene-bg-2, .scene-bg-0 { background:
-        radial-gradient(circle at 18% 18%, rgba(145,195,255,.24), transparent 28%),
-        radial-gradient(circle at 82% 78%, rgba(136,224,199,.20), transparent 24%),
-        linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 58%),
-        linear-gradient(180deg,#f5f4ed 0%,#faf9f5 42%,#f0eee6 100%); }
-      .grid { position:absolute; inset:0; background-image: linear-gradient(rgba(97,140,178,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(97,140,178,.08) 1px, transparent 1px); background-size: 70px 70px; mask-image: linear-gradient(180deg, transparent 0%, black 18%, black 82%, transparent 100%); opacity:.24; }
-      .glow { position:absolute; border-radius:50%; filter:blur(80px); opacity:.55; }
-      .glow-a { width:360px; height:360px; left:-80px; top:190px; background:rgba(145,195,255,.28); }
-      .glow-b { width:380px; height:380px; right:-90px; bottom:260px; background:rgba(113,201,190,.22); }
-      .scene-shell { position:absolute; inset:44px 42px 72px; border-radius:48px; border:2px solid rgba(118,180,224,.18); background:linear-gradient(180deg, rgba(255,255,255,.48), rgba(250,249,245,.24)); box-shadow:0 26px 80px rgba(88,134,171,.12), inset 0 1px 0 rgba(255,255,255,.58); backdrop-filter: blur(10px); }
-      .meta-bar { position:absolute; top:76px; left:76px; right:76px; height:76px; border:2px solid rgba(118,180,224,.28); border-radius:36px; background:rgba(255,255,255,.42); display:flex; align-items:center; justify-content:space-between; padding:0 34px; backdrop-filter: blur(10px); }
+        radial-gradient(circle at 18% 18%, rgba(205,193,255,.26), transparent 30%),
+        radial-gradient(circle at 82% 78%, rgba(179,225,255,.22), transparent 26%),
+        linear-gradient(180deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 58%),
+        linear-gradient(180deg,#f7f8fc 0%,#eef4fb 52%,#e9f2fb 100%); }
+      .grid { position:absolute; inset:0; background-image: linear-gradient(rgba(140,160,210,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(140,160,210,.08) 1px, transparent 1px); background-size: 70px 70px; mask-image: linear-gradient(180deg, transparent 0%, black 18%, black 82%, transparent 100%); opacity:.2; }
+      .glow { position:absolute; border-radius:50%; filter:blur(90px); opacity:.58; }
+      .glow-a { width:380px; height:380px; left:-70px; top:160px; background:rgba(208,193,255,.34); }
+      .glow-b { width:420px; height:420px; right:-60px; bottom:180px; background:rgba(182,227,255,.30); }
+      .scene-shell { position:absolute; inset:100px; border-radius:44px; border:1px solid rgba(168,183,223,.92); background:
+        radial-gradient(circle at 16% 16%, rgba(232,220,255,.5), transparent 30%),
+        radial-gradient(circle at 82% 22%, rgba(255,226,239,.4), transparent 22%),
+        radial-gradient(circle at 84% 84%, rgba(194,230,255,.62), transparent 30%),
+        linear-gradient(135deg, rgba(246,242,255,.98) 0%, rgba(231,242,255,.96) 58%, rgba(222,236,247,.96) 100%); box-shadow:0 30px 96px rgba(112,132,186,.18), inset 0 1px 0 rgba(255,255,255,.88); backdrop-filter: blur(12px); }
+      .meta-bar { position:absolute; top:126px; left:126px; right:126px; height:68px; border:1px solid rgba(176,190,228,.84); border-radius:34px; background:linear-gradient(135deg, rgba(244,239,255,.68) 0%, rgba(228,241,255,.74) 100%); display:flex; align-items:center; justify-content:space-between; padding:0 30px; backdrop-filter: blur(10px); }
       .meta-bar::before { content:''; width:56px; height:12px; border-radius:10px; background:linear-gradient(90deg,#c96442,#d97757,#d97757); box-shadow:0 0 12px rgba(255,183,77,.24); }
-      .meta-pill { font-size:24px; color:#141413; letter-spacing:.5px; margin-left:-220px; }
+      .meta-pill { font-size:22px; color:#3f4a68; letter-spacing:.5px; margin-left:-220px; }
       .meta-index { font-size:24px; color:#87867f; font-family:Consolas, monospace; }
-      .scene-content { position:absolute; inset:0; padding:228px 108px 430px; display:flex; flex-direction:column; gap:20px; z-index:1; }
+      .scene-content { position:absolute; inset:0; padding:258px 156px 486px; display:flex; flex-direction:column; gap:18px; z-index:1; }
       .scene.with-visual .card { display:none; }
-      .scene.with-visual .scene-content { padding-bottom:300px; }
-      .scene-visual { position:absolute; left:98px; right:98px; top:760px; height:520px; z-index:1; }
-      .visual-frame { position:relative; width:100%; height:100%; border-radius:28px; overflow:hidden; border:2px solid rgba(118,180,224,.16); background:rgba(229,244,255,.12); box-shadow:0 20px 60px rgba(88,134,171,.12); backdrop-filter: blur(6px); }
+      .scene.with-visual .scene-content { padding-bottom:410px; }
+      .scene-visual { position:absolute; left:156px; right:156px; top:710px; height:540px; z-index:1; }
+      .visual-frame { position:relative; width:100%; height:100%; border-radius:28px; overflow:hidden; border:1px solid rgba(178,193,230,.84); background:
+        linear-gradient(135deg, rgba(239,232,255,.82) 0%, rgba(216,235,255,.86) 62%, rgba(244,237,255,.74) 100%); box-shadow:0 20px 52px rgba(112,132,186,.12); backdrop-filter: blur(8px); }
       .visual-image { width:100%; height:100%; object-fit:contain; display:block; background:transparent; }
-      .kicker { font-size:24px; color:#c96442; letter-spacing:2px; text-transform:uppercase; }
-      .title { font-size:86px; line-height:1.04; font-weight:900; max-width:760px; color:#141413; text-shadow:none; }
-      .accent { font-size:44px; line-height:1.1; font-weight:800; color:#5e5d59; }
-      .card { margin-top:34px; border-radius:42px; border:2px solid rgba(118,180,224,.16); background:rgba(255,255,255,.30); box-shadow:0 18px 40px rgba(88,134,171,.10), inset 0 1px 0 rgba(255,255,255,.5); backdrop-filter: blur(10px); }
-      .hero-card { padding:40px 42px; display:flex; flex-direction:column; gap:16px; }
+      .kicker { font-size:24px; color:#9c6fdd; letter-spacing:2px; text-transform:uppercase; }
+      .title { font-size:76px; line-height:1.04; font-weight:900; max-width:700px; color:#141413; text-shadow:none; }
+      .accent { font-size:38px; line-height:1.1; font-weight:800; color:#5f6986; }
+      .card { margin-top:28px; border-radius:34px; border:1px solid rgba(176,191,229,.86); background:
+        linear-gradient(135deg, rgba(239,231,255,.84) 0%, rgba(216,235,255,.88) 60%, rgba(244,236,255,.76) 100%); box-shadow:0 18px 36px rgba(112,132,186,.12), inset 0 1px 0 rgba(255,255,255,.5); backdrop-filter: blur(10px); }
+      .hero-card { padding:34px 36px; display:flex; flex-direction:column; gap:12px; }
       .hero-chip { align-self:flex-start; padding:12px 22px; border-radius:999px; font-size:28px; color:#141413; background:linear-gradient(90deg,#85D9D6,#B8D7FF); font-weight:800; }
-      .hero-stat { font-size:72px; font-weight:900; color:#141413; }
-      .hero-desc { font-size:30px; color:#48627C; }
+      .hero-stat { font-size:60px; font-weight:900; color:#141413; }
+      .hero-desc { font-size:26px; color:#48627C; }
       .terminal-card { padding:0; overflow:hidden; }
       .window-bar { height:74px; display:flex; align-items:center; gap:12px; padding:0 24px; background:rgba(118,180,224,.10); color:#506A84; font-size:24px; }
       .window-bar span { width:14px; height:14px; border-radius:50%; background:#c96442; }
@@ -254,9 +332,10 @@ def build_html(scenes, starts, total):
       .checklist-card { padding:30px 28px; display:flex; flex-direction:column; gap:18px; }
       .check-item { display:flex; align-items:center; gap:18px; padding:16px 16px; border-radius:24px; background:rgba(255,255,255,.30); font-size:28px; color:#141413; }
       .check-item i { width:24px; height:24px; border-radius:50%; background:#d97757; box-shadow:0 0 16px rgba(217,119,87,.38); }
-      .bottom-caption { position:absolute; left:108px; right:108px; bottom:224px; padding:26px 30px; border-radius:30px; background:rgba(255,255,255,.42); border:2px solid rgba(118,180,224,.16); color:#141413; font-size:28px; font-weight:800; line-height:1.4; box-shadow:0 14px 30px rgba(88,134,171,.08); z-index:1; }
-      .progress-shell { position:absolute; left:108px; right:108px; bottom:160px; height:14px; border-radius:999px; background:rgba(118,180,224,.18); overflow:hidden; z-index:1; }
-      .progress-fill { width:100%; height:100%; transform-origin:left center; background:linear-gradient(90deg,#74CFC9,#8FB8FF); }
+      .bottom-caption { position:absolute; left:156px; right:156px; bottom:232px; padding:24px 28px; border-radius:26px; background:
+        linear-gradient(135deg, rgba(239,231,255,.84) 0%, rgba(216,235,255,.88) 60%, rgba(244,236,255,.74) 100%); border:1px solid rgba(176,191,229,.86); color:#263148; font-size:25px; font-weight:800; line-height:1.4; box-shadow:0 14px 28px rgba(112,132,186,.1); z-index:1; }
+      .progress-shell { position:absolute; left:156px; right:156px; bottom:186px; height:12px; border-radius:999px; background:rgba(180,196,235,.36); overflow:hidden; z-index:1; }
+      .progress-fill { width:100%; height:100%; transform-origin:left center; background:linear-gradient(90deg,#b79cff,#8dc8ff); }
     </style>
   </head>
   <body>
@@ -305,6 +384,7 @@ def build_html(scenes, starts, total):
       const tl = gsap.timeline({ paused: true });
       const SCENES = __SCENES_JSON__;
       const totalDuration = __TOTAL__;
+      const firstSceneTransitionStart = __FIRST_SCENE_TRANSITION_START__;
 
       gsap.set('.progress-fill', { scaleX: 0 });
       gsap.set('#intro-cover', { autoAlpha: 1 });
@@ -320,35 +400,39 @@ def build_html(scenes, starts, total):
       tl.from('.intro-box', { y: 46, duration: .45, stagger: .1, ease: 'back.out(1.08)' }, 0.62);
       tl.to('.intro-ring', { rotation: 22, scale: 1.06, duration: 1.8, ease: 'sine.inOut' }, 0);
       tl.to('.intro-ring-two', { rotation: -18, scale: .94, duration: 1.8, ease: 'sine.inOut' }, 0);
-      tl.to('#intro-cover', { scale: 1.03, filter: 'blur(12px)', opacity: 0, duration: .44, ease: 'power2.in' }, 1.58);
-      tl.set('#intro-cover', { autoAlpha: 0 }, 2.04);
+      tl.set('#scene-1', { autoAlpha: 1, x: 1080, opacity: 1, scale: 1, filter: 'blur(0px)' }, firstSceneTransitionStart - 0.06);
+      tl.to('#intro-cover', { x: -1080, duration: .42, ease: 'power2.inOut' }, firstSceneTransitionStart);
+      tl.fromTo('#scene-1', { x: 1080, opacity: 1, scale: 1, filter: 'blur(0px)' }, { x: 0, opacity: 1, scale: 1, filter: 'blur(0px)', duration: .42, ease: 'power2.inOut' }, firstSceneTransitionStart);
+      tl.set('#intro-cover', { autoAlpha: 0, x: 0 }, firstSceneTransitionStart + 0.44);
 
       SCENES.forEach((scene, idx) => {
         const s = scene.start;
         const d = scene.duration;
         const root = `#scene-${scene.id}`;
-        const enterAt = idx === 0 ? Math.max(2.02, s + 0.02) : s + 0.18;
+        const enterAt = idx === 0 ? firstSceneTransitionStart : s + 0.18;
         const exitAt = s + d - 0.24;
 
-        tl.set(root, { autoAlpha: 1, x: 0, opacity: 1, scale: 1, filter: 'blur(0px)' }, enterAt - 0.02);
-        tl.fromTo(
-          root,
-          {
-            x: idx === 0 ? 0 : 1080,
-            opacity: idx === 0 ? 0 : 1,
-            scale: 1,
-            filter: idx === 0 ? 'blur(8px)' : 'blur(0px)'
-          },
-          {
-            x: 0,
-            opacity: 1,
-            scale: 1,
-            filter: 'blur(0px)',
-            duration: idx === 0 ? 0.58 : 0.34,
-            ease: idx === 0 ? 'expo.out' : 'power2.out'
-          },
-          enterAt
-        );
+        if (idx > 0) {
+          tl.set(root, { autoAlpha: 1, x: 0, opacity: 1, scale: 1, filter: 'blur(0px)' }, enterAt - 0.02);
+          tl.fromTo(
+            root,
+            {
+              x: 1080,
+              opacity: 1,
+              scale: 1,
+              filter: 'blur(0px)'
+            },
+            {
+              x: 0,
+              opacity: 1,
+              scale: 1,
+              filter: 'blur(0px)',
+              duration: 0.34,
+              ease: 'power2.out'
+            },
+            enterAt
+          );
+        }
 
         tl.from(`${root} .meta-bar`, { y: -28, opacity: 0, duration: 0.28, ease: 'power2.out' }, s + 0.12);
         tl.from(`${root} .kicker`, { x: -20, opacity: 0, duration: 0.28, ease: 'power2.out' }, s + 0.18);
@@ -390,7 +474,8 @@ def build_html(scenes, starts, total):
         .replace('__INTRO_PROBLEM__', intro_problem)
         .replace('__INTRO_POINTS_HTML__', intro_points_html)
         .replace('__SCENE_DIVS__', ''.join(scene_divs))
-        .replace('__SCENES_JSON__', json.dumps(js_data, ensure_ascii=False)))
+        .replace('__SCENES_JSON__', json.dumps(js_data, ensure_ascii=False))
+        .replace('__FIRST_SCENE_TRANSITION_START__', str(PREVIEW_TRANSITION_START)))
 
 if __name__ == '__main__':
     asyncio.run(main())
