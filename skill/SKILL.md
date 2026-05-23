@@ -23,11 +23,12 @@ description: Create content production outputs for 长文、图文、视频 in a
 3. 视频默认控制在 1 分钟左右；除非用户明确要求长视频，最好不要超过 2 分钟。
 4. 视频相关源文件统一放进`素材文件/`，最终成片直接放文章根目录。
 5. 视频工程默认从`assets/video-template/`复制，不要临时重新搭一套新模板。
-6. 视频排版、边距、颜色、转场、预览方式，统一遵守：
+6. 视频配音默认使用小米 MiMo `冰糖` 音色，按 `references/tts-rules.md` 生成整条连贯旁白；微软 TTS 只作为明确指定或降级备用路线。
+7. 视频排版、边距、颜色、转场、预览方式，统一遵守：
    - `references/output-video.md`
    - `references/video-production-workflow.md`
    - `assets/design-default/DESIGN.md`
-7. 做视频时，优先先出 4 秒预览确认视觉，再决定是否批量渲染整条视频。
+8. 做视频时，优先先出 4 秒预览确认视觉，再决定是否批量渲染整条视频。
 
 ## 工作流
 按这个顺序执行：
@@ -42,6 +43,7 @@ description: Create content production outputs for 长文、图文、视频 in a
    - 再写`素材文件/标题-大纲.md`
    - 再写`素材文件/标题-配音文件.md`
    - 配音稿和页面数量按 1 分钟左右控制，通常不要超过 2 分钟
+   - 默认用小米 MiMo `冰糖` 生成整条旁白
    - 再准备`image/`
    - 再复制并修改`视频工程/`
    - 先导出 4 秒预览，确认后再继续整条

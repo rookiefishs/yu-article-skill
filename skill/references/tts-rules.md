@@ -7,24 +7,27 @@
 - 使用 `scripts/mimo-tts-bingtang.py` 脚本生成小米 MiMo 冰糖音色配音
 
 ## 技术基础
-底层使用微软 Azure TTS 引擎，支持 SSML 标签。
-通过 `scripts/tts-generate.js` 脚本调用，脚本会自动分段、逐段生成、合并音频，支持直接合并到视频。
-
-现在额外保留一条小米 MiMo TTS 路线：
+默认使用小米 MiMo TTS 生成视频旁白：
 - 默认使用 `mimo-v2.5-tts`
 - 默认音色使用 `冰糖`
 - 默认接口使用 `https://token-plan-cn.xiaomimimo.com/v1`
 - API Key 从环境变量 `MIMO_API_KEY` 读取
-- 旧的 `scripts/tts-generate.js` 不删除，作为原有 TTS 路线保留
+
+旧的微软 Azure TTS 路线仍保留：
+- 通过 `scripts/tts-generate.js` 脚本调用
+- 支持 SSML 标签、分段生成、合并音频和直接合并到视频
+- 只在用户明确要求微软/Azure 音色，或 MiMo 不可用且用户接受降级时使用
 
 ## 推荐语音模型
 
-### 小米 MiMo（当前默认试听音色）
+### 小米 MiMo（默认视频旁白）
 | 模型 | 音色 | 特点 |
 |------|------|------|
-| mimo-v2.5-tts | 冰糖 | 中文女声，自然清晰，适合短视频口播试听 |
+| mimo-v2.5-tts | 冰糖 | 中文女声，自然清晰，适合短视频口播和 AI 编程教程内容 |
 
-### 男声（视频旁白首选）
+默认使用小米 MiMo `冰糖` 音色，通过 `scripts/mimo-tts-bingtang.py` 生成。
+
+### 微软男声（备用）
 | 模型 | ID | 特点 |
 |------|-----|------|
 | 云希 | zh-CN-YunxiNeural | 年轻男声，自然清晰，适合科技/教程类旁白 |
@@ -32,7 +35,7 @@
 | 云扬 | zh-CN-YunyangNeural | 成年男声，新闻播报感 |
 | 云枫 | zh-CN-YunfengNeural | 成年男声，磁性低沉 |
 
-### 女声
+### 微软女声（备用）
 | 模型 | ID | 特点 |
 |------|-----|------|
 | 晓晓 | zh-CN-XiaoxiaoNeural | 年轻女声，活泼自然，适合短视频 |
@@ -40,11 +43,11 @@
 | 晓柔 | zh-CN-XiaorouNeural | 年轻女声，柔和舒缓 |
 | 晓梦 | zh-CN-XiaomengNeural | 年轻女声，甜美清亮 |
 
-默认使用 `云希 (zh-CN-YunxiNeural)`，适合账号定位的 AI 编程教程内容。
+如果用户明确选择微软 TTS，优先使用 `云希 (zh-CN-YunxiNeural)`。
 
-如果用户明确选择小米 TTS，默认使用 `冰糖`，通过 `scripts/mimo-tts-bingtang.py` 生成。
+## 微软 TTS 基础参数
+以下参数仅适用于 `scripts/tts-generate.js` 微软 TTS 备用路线。
 
-## 基础参数
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
 | rate | `0` | 语速，范围 -100 到 100。视频旁白建议 -5 到 5 之间 |
@@ -141,7 +144,7 @@
 ### 小米 MiMo 冰糖音色
 脚本路径：`scripts/mimo-tts-bingtang.py`
 
-从配音文件生成冰糖音色：
+默认从配音文件生成冰糖音色：
 ```bash
 python scripts/mimo-tts-bingtang.py --input 标题-配音文件.md --output 标题-小米TTS-冰糖.wav
 ```
@@ -159,7 +162,7 @@ python scripts/mimo-tts-bingtang.py --text "你好，这是一段小米冰糖音
 
 如果配音文件末尾有 `## 整条连贯版` 或 `## 完整文案`，脚本优先使用这部分生成整条旁白。
 
-### 原有 TTS 脚本
+### 微软 TTS 备用脚本
 脚本路径：`scripts/tts-generate.js`
 
 ### 从配音文件生成音频

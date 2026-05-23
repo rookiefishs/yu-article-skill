@@ -1,16 +1,17 @@
 ﻿# -*- coding: utf-8 -*-
 from pathlib import Path
-import asyncio, subprocess, json, textwrap
-import edge_tts
+import subprocess, json, textwrap, sys
 
 ROOT = Path(__file__).resolve().parent
 ARTICLE_ROOT = ROOT.parent
 SOURCE_DIR = ARTICLE_ROOT / '素材文件'
 ASSETS = ROOT / 'assets'
 ASSETS.mkdir(exist_ok=True)
-VOICE = 'zh-CN-YunyangNeural'
-RATE = '+24%'
-SCENE_GAP_SECONDS = 0.45
+TTS_PROVIDER = 'xiaomi-mimo'
+TTS_MODEL = 'mimo-v2.5-tts'
+TTS_VOICE = '冰糖'
+TTS_SCRIPT = Path(r'E:\project\个人skill\yu-article-skill\skill\scripts\mimo-tts-bingtang.py')
+TTS_STYLE = '中文科技短视频旁白，清晰、自然、口语化，语速略快但不要急，避免播音腔。'
 PREVIEW_TRANSITION_START = 1.68
 
 # 替换为实际视频内容
@@ -114,33 +115,106 @@ DESIGN = textwrap.dedent('''
 - 下一页必须完整覆盖上一页，不做内容替换式切换
 ''').strip() + '\n'
 
-async def synth(scene, path):
-    communicate = edge_tts.Communicate(scene['voice'], VOICE, rate=RATE)
-    await communicate.save(str(path))
+def voice_text(scene):
+    return scene.get('voice', '').strip()
 
-async def synth_full_narration(scenes, path):
-    full_voice = '\n\n'.join(scene['voice'].strip() for scene in scenes if scene.get('voice'))
-    communicate = edge_tts.Communicate(full_voice, VOICE, rate=RATE)
-    await communicate.save(str(path))
+def synth_full_narration(voice_file, path):
+    if not TTS_SCRIPT.exists():
+        raise SystemExit(f'Missing MiMo TTS script: {TTS_SCRIPT}')
+    wav_path = ASSETS / 'narration-mimo-bingtang.wav'
+    subprocess.run([
+        sys.executable,
+        str(TTS_SCRIPT),
+        '--input',
+        str(voice_file),
+        '--output',
+        str(wav_path),
+        '--style',
+        TTS_STYLE,
+    ], check=True)
+    subprocess.run([
+        'ffmpeg',
+        '-y',
+        '-i',
+        str(wav_path),
+        '-ar',
+        '44100',
+        '-ac',
+        '2',
+        '-b:a',
+        '192k',
+        str(path),
+    ], check=True)
+
+def allocate_scene_durations(scenes, narration_duration):
+    overlap = 0.55
+    target_sum = max(narration_duration + overlap * max(0, len(scenes) - 1), len(scenes) * 4.2)
+    weights = [max(1, len(voice_text(scene))) for scene in scenes]
+    weight_sum = sum(weights) or len(scenes)
+    durations = [round(max(4.2, target_sum * weight / weight_sum), 2) for weight in weights]
+    diff = round(target_sum - sum(durations), 2)
+    if durations:
+        durations[-1] = round(max(4.2, durations[-1] + diff), 2)
+    return durations
+
+def format_ts(seconds):
+    seconds = max(0, int(round(seconds)))
+    h = seconds // 3600
+    m = (seconds % 3600) // 60
+    s = seconds % 60
+    return f'{h:02d}:{m:02d}:{s:02d}'
 
 def ffprobe_duration(path):
     res = subprocess.run(['ffprobe','-v','error','-show_entries','format=duration','-of','default=nw=1:nk=1',str(path)], capture_output=True, text=True, check=True)
     return float(res.stdout.strip())
 
-async def main():
+def topic_title():
+    name = ARTICLE_ROOT.name
+    for prefix in ('待-', '待_', '待 '):
+        if name.startswith(prefix):
+            return name[len(prefix):]
+    if '-' in name and name.split('-', 1)[0].isdigit():
+        return name.split('-', 1)[1]
+    return name
+
+def write_source_docs(starts=None):
+    title = topic_title()
+    outline_lines = [f'# {title} - 视频大纲', '']
+    voice_lines = ['# 配音文件', '']
+    full_voice = []
+    for i, scene in enumerate(SCENES, start=1):
+        outline_lines.append(f"- [{scene.get('kind', 'scene')}] {scene.get('title', '')}｜{scene.get('accent', '')}｜{scene.get('caption', '')}")
+        if starts:
+            voice_lines.append(f"[{format_ts(starts[i - 1])}] {scene.get('title', '')}")
+        else:
+            voice_lines.append(f"## 场景{i} {scene.get('title', '')}")
+        voice = voice_text(scene)
+        voice_lines.append(voice)
+        voice_lines.append('')
+        if voice:
+            full_voice.append(voice)
+    voice_lines.append('---')
+    voice_lines.append('')
+    voice_lines.append('## 完整文案')
+    voice_lines.append('\n\n'.join(full_voice))
+    (SOURCE_DIR / f'{title}-大纲.md').write_text('\n'.join(outline_lines).strip() + '\n', encoding='utf-8')
+    (SOURCE_DIR / f'{title}-配音文件.md').write_text('\n'.join(voice_lines).strip() + '\n', encoding='utf-8')
+
+def main():
     SOURCE_DIR.mkdir(exist_ok=True)
     (SOURCE_DIR / 'DESIGN.md').write_text(DESIGN, encoding='utf-8')
     gsap = ASSETS / 'gsap.min.js'
     if not gsap.exists():
         raise SystemExit('Missing assets/gsap.min.js，请先放置GSAP库文件')
-    audio_files = []
-    for i, scene in enumerate(SCENES):
-        p = ASSETS / f'scene_{i:02d}.mp3'
-        await synth(scene, p)
-        audio_files.append(p)
-    for scene, p in zip(SCENES, audio_files):
-        scene['audio_duration'] = ffprobe_duration(p)
-        scene['duration'] = round(scene['audio_duration'] + SCENE_GAP_SECONDS, 2)
+    for old_scene_audio in ASSETS.glob('scene_*.mp3'):
+        old_scene_audio.unlink()
+    narration = ASSETS / 'narration.mp3'
+    write_source_docs()
+    voice_file = SOURCE_DIR / f'{topic_title()}-配音文件.md'
+    synth_full_narration(voice_file, narration)
+    narration_duration = ffprobe_duration(narration)
+    for scene, duration in zip(SCENES, allocate_scene_durations(SCENES, narration_duration)):
+        scene['duration'] = duration
     overlap = 0.55
     starts = []
     t = 0.0
@@ -150,13 +224,12 @@ async def main():
             t += scene['duration'] - overlap
         else:
             t += scene['duration']
-    total = round(t + 0.4, 2)
-    narration = ASSETS / 'narration.mp3'
-    await synth_full_narration(SCENES, narration)
+    total = round(max(t + 0.4, narration_duration + 0.35), 2)
+    write_source_docs(starts)
 
     html = build_html(SCENES, starts, total)
     (ROOT / 'index.html').write_text(html, encoding='utf-8')
-    meta = {'total_duration': total, 'starts': starts, 'scenes': [{k:v for k,v in s.items() if k in ('title','accent','caption','duration','audio_duration','kind')} for s in SCENES]}
+    meta = {'total_duration': total, 'narration_duration': round(narration_duration, 2), 'tts_provider': TTS_PROVIDER, 'tts_model': TTS_MODEL, 'voice': TTS_VOICE, 'starts': starts, 'scenes': [{k:v for k,v in s.items() if k in ('title','accent','caption','duration','kind')} for s in SCENES]}
     (ROOT / 'build_meta.json').write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(meta, ensure_ascii=False, indent=2))
 
@@ -478,4 +551,4 @@ def build_html(scenes, starts, total):
         .replace('__FIRST_SCENE_TRANSITION_START__', str(PREVIEW_TRANSITION_START)))
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
