@@ -78,9 +78,34 @@ def clean_text(text: str) -> str:
         line = re.sub(r"^\[[\d:]+\]\s*", "", line)
         line = re.sub(r"^\*\*(.*?)\*\*\s*", r"\1", line)
         line = re.sub(r"^>\s*", "", line)
+        line = re.sub(r"<break\s+time=\"[^\"]+\"\s*/?>", " ", line, flags=re.IGNORECASE)
+        line = re.sub(r"<phoneme\b[^>]*>(.*?)</phoneme>", r"\1", line, flags=re.IGNORECASE)
+        line = re.sub(r"<[^>]+>", " ", line)
         line = line.replace("`", "")
         lines.append(line)
-    return "".join(lines).strip()
+    return normalize_plain_narration(" ".join(lines))
+
+
+def normalize_plain_narration(text: str) -> str:
+    text = convert_digits_for_tts(text)
+    text = re.sub(r"[，。！？、；：,.!?;:\"'“”‘’（）()【】\[\]{}《》<>「」『』—–_\-+*=#/@\\|~￥$%^&]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def convert_digits_for_tts(text: str) -> str:
+    digits = {
+        "0": "零",
+        "1": "一",
+        "2": "二",
+        "3": "三",
+        "4": "四",
+        "5": "五",
+        "6": "六",
+        "7": "七",
+        "8": "八",
+        "9": "九",
+    }
+    return re.sub(r"\d+", lambda match: "".join(digits[ch] for ch in match.group(0)), text)
 
 
 def read_input(args: argparse.Namespace) -> str:

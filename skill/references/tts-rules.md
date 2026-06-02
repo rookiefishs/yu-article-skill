@@ -2,9 +2,18 @@
 
 ## 适用场景
 - 视频配音文案需要生成音频
-- 需要控制多音字读音、停顿等细节
+- 需要生成无标点、无格式符号、空白分隔的正常朗读文本
 - 使用 `scripts/tts-generate.js` 脚本生成音频并合并到视频
 - 使用 `scripts/mimo-tts-bingtang.py` 脚本生成小米 MiMo 冰糖音色配音
+
+## 配音文本硬规则
+- 配音文本只写正常朗读内容，不写 SSML、HTML、Markdown、时间轴或任何格式符号。
+- 不使用 `<break time="300ms" />`、`<phoneme>`、`[00:00:00]`、`---`、代码块、标题标记。
+- 不使用任何标点符号，包括逗号、句号、顿号、冒号、问号、感叹号、括号、引号、斜杠、连接号。
+- 句子和停顿只用空白隔开。
+- 数字读音要直接写成期望读法。比如 `第 2 期` 必须写成 `第二期`，不要写成阿拉伯数字，避免读成“两”。
+- 英文技术词可以保留英文原文，比如 `GSAP`、`AI`、`HTML`、`HyperFrames`。
+- 配音文件可以只保留一段完整纯文本，方便直接送入 TTS。
 
 ## 技术基础
 默认使用小米 MiMo TTS 生成视频旁白：
@@ -55,88 +64,21 @@
 | volume | `125` | 音量，范围 0 到 100；本脚本实测支持高于 100 的增益值，视频旁白默认用 125，避免后期手动调高 |
 | kbitrate | `audio-48khz-192kbitrate-mono-mp3` | 高质量输出，视频用 |
 
-## 多音字标注
-
-用 SSML `<phoneme>` 标签标注多音字读音。
-
-格式：`<phoneme alphabet="sapi" ph="拼音 声调">字</phoneme>`
-
-声调规则：1 = 一声，2 = 二声，3 = 三声，4 = 四声，5 = 轻声。
-
-### 常见多音字示例
-
-```
-<phoneme alphabet="sapi" ph="hai 2">还</phoneme>有
-<phoneme alphabet="sapi" ph="huan 2">还</phoneme>给你
-无法<phoneme alphabet="sapi" ph="zhuo 2">着</phoneme>手对付
-让他<phoneme alphabet="sapi" ph="gan 1">干</phoneme><phoneme alphabet="sapi" ph="zhao 1">着</phoneme>急
-木<phoneme alphabet="sapi" ph="tou 5">头</phoneme>
-这个<phoneme alphabet="sapi" ph="jiao 3">角</phoneme>度
-扮演<phoneme alphabet="sapi" ph="jue 2">角</phoneme>色
-<phoneme alphabet="sapi" ph="chu 3">处</phoneme>理问题
-```
-
-原则：
-- 只标注需要纠正的多音字，其余正常书写
-- 一个 phoneme 标签只包裹一个字
-- ph 属性中拼音和声调之间用空格分隔
-
-## 停顿控制
-
-用 `<break>` 标签插入停顿。
-
-格式：`<break time="毫秒ms" />`
-
-### 常用停顿
-| 场景 | 写法 | 时长 |
-|------|------|------|
-| 句间换气 | `<break time="300ms" />` | 0.3秒 |
-| 场景切换 | `<break time="500ms" />` | 0.5秒 |
-| 段落结束 | `<break time="800ms" />` | 0.8秒 |
-| 重点强调前 | `<break time="1000ms" />` | 1秒 |
-| 长停顿/转场 | `<break time="2000ms" />` | 2秒 |
-| 特殊停顿 | `<break time="5000ms" />` | 5秒 |
-
 ## 配音文案文件规范
 
 ### 文件名
 `标题-配音文件.md`
 
 ### 文件结构
-- 按场景分段，每段用时间轴标注
-- 段落之间保留一个空行
-- 每段文案直接可用于生成音频
-- 多音字和停顿标签直接写在文案文本里
+- 默认只保留一段完整纯文本
+- 文本里不写标题、时间轴、SSML、Markdown 或标点
+- 停顿通过空白自然分隔，不写标签
+- 多音字和数字读法直接改写成想要朗读的汉字
 
 ### 结构示例
 
 ```markdown
-[00:00:00] 开场
-
-大家好，今天我们来聊一个很实用的话题。<break time="500ms" />
-
-[00:00:05] 核心观点
-
-很多人觉得 AI 写代码就是自动补全，但实际上它能<phoneme alphabet="sapi" ph="gan 4">干</phoneme>的事比你想的多得多。<break time="300ms" />关键不是工具本身，而是你怎么用它。
-
-[00:00:15] 结尾
-
-好了，今天就聊到这里。<break time="1000ms" />觉得有用的话点个关注，下期再见。
-```
-
-### 文末附完整连续文案
-在分段文案之后，附一份去掉时间轴标注的完整连续文案，方便直接复制使用：
-
-```markdown
----
-
-## 完整文案
-
-大家好，今天我们来聊一个很实用的话题。<break time="500ms" />
-
-很多人觉得 AI 写代码就是自动补全，但实际上它能<phoneme alphabet="sapi" ph="gan 4">干</phoneme>的事比你想的多得多。<break time="300ms" />关键不是工具本身，而是你怎么用它。
-
-好了，今天就聊到这里。<break time="1000ms" />觉得有用的话点个关注，下期再见。
+大家好 今天我们来聊一个很实用的话题 很多人觉得 AI 写代码就是自动补全 但它能做的事比你想的多得多 关键不是工具本身 是你怎么用它
 ```
 
 ## 脚本使用方法
@@ -160,7 +102,7 @@ python scripts/mimo-tts-bingtang.py --text "你好，这是一段小米冰糖音
 - `--base-url`：默认 `https://token-plan-cn.xiaomimimo.com/v1`
 - `--save-text`：保存从配音文件中提取出来的朗读文本
 
-如果配音文件末尾有 `## 整条连贯版` 或 `## 完整文案`，脚本优先使用这部分生成整条旁白。
+脚本会自动清理旧文件中的格式符号和标点，但新生成的配音文件必须直接写成纯文本，不要依赖脚本兜底。
 
 ### 微软 TTS 备用脚本
 脚本路径：`scripts/tts-generate.js`

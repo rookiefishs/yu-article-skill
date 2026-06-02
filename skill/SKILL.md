@@ -22,12 +22,13 @@ description: Create content production outputs for 长文、图文、视频 in a
 2. 用户明确给了新的视觉方向，再覆盖默认视频规范。
 3. 视频默认控制在 1 分钟左右；除非用户明确要求长视频，最好不要超过 2 分钟。
 4. 视频相关源文件统一放进`素材文件/`，最终成片直接放文章根目录。
-5. 视频工程默认从`assets/video-template/`复制，不要临时重新搭一套新模板。
-6. 视频配音默认使用小米 MiMo `冰糖` 音色，按 `references/tts-rules.md` 生成整条连贯旁白；微软 TTS 只作为明确指定或降级备用路线。
+5. 视频工程默认从`assets/video-template/`复制，不要临时重新搭一套新模板；用户明确指定`2号视频规范`、`2号视频模板`或`4:3视频模板`时，改用`assets/video-template-2-4x3/`。
+6. 视频配音默认使用小米 MiMo `冰糖` 音色，按 `references/tts-rules.md` 生成无标点、无格式符号、用空白隔开的整条纯文本旁白；微软 TTS 只作为明确指定或降级备用路线。
 7. 视频排版、边距、颜色、转场、预览方式，统一遵守：
    - `references/output-video.md`
    - `references/video-production-workflow.md`
    - `assets/design-default/DESIGN.md`
+   - 用户指定 2 号 4:3 效果时，改读 `references/output-video-2-4x3.md`
 8. 做视频时，优先先出 4 秒预览确认视觉，再决定是否批量渲染整条视频。
 
 ## 工作流
@@ -61,6 +62,7 @@ description: Create content production outputs for 长文、图文、视频 in a
 - `references/output-longform.md`：长文输出规则
 - `references/output-graphic-post.md`：图文输出规则
 - `references/output-video.md`：视频结构、边距、配色、转场规则
+- `references/output-video-2-4x3.md`：2号视频规范，4:3 横版浅色科技图文风，复用 `assets/video-template-2-4x3/`
 - `references/video-production-workflow.md`：视频落地流程、预览、渲染与验收
 - `references/tts-rules.md`：配音文本与 SSML 规则
 - `references/video-assets-rules.md`：视频素材准备规则
