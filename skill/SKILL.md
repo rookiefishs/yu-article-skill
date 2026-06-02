@@ -69,6 +69,8 @@ description: Create content production outputs for 长文、图文、视频 in a
 - `references/style-rules.md`：通用写作风格规则
 - `references/platform-safety.md`：平台安全边界
 
+图文卡片、图文照片、配图加文字效果、生成图文成图时，必须读取 `references/output-graphic-post.md`，并按其中“两步流程”和“图文照片竖屏规范”执行：第一步只生成目录、正文、配图提示词和参考图；第二步等用户准备好配图后，再生成根目录 `图文照片/` 下的竖屏数字顺序成图，源码只放根目录 `图文素材/`。
+
 ## 工作原则
 - 先给可执行结果，再补说明
 - 默认最小可交付，不做无关扩写
