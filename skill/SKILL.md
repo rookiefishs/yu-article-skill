@@ -1,6 +1,7 @@
 ---
 name: yu-article-skill
-description: Create content production outputs for 长文、图文、视频 in a consistent AI 编程内容风格. Use when the user wants topic planning, preview drafting, 正文 writing, 封面提示词, 配图提示词, 视频大纲, 配音文本, or structured content directories. If the user has not specified the output form, default to 长文. If the user chooses 视频 and does not provide a visual direction, use the built-in default video spec in this skill: 浅色简约、紫蓝渐变、整页滑动转场、统一页面壳； only ask follow-up questions when the user explicitly wants a different visual style. When the user provides a short-video share link or copied share text, first read the visible/shared video information, then search the web for related materials, and then generate content in the requested output form.
+description: >-
+  Create content production outputs for 长文、图文、视频 in a consistent AI 编程内容风格. Use when the user wants topic planning, preview drafting, 正文 writing, 封面提示词, 配图提示词, 视频大纲, 配音文本, or structured content directories. If the user has not specified the output form, default to 长文. If the user chooses 视频 and does not provide a visual direction, use the built-in default video spec in this skill: 浅色简约、紫蓝渐变、整页滑动转场、统一页面壳； only ask follow-up questions when the user explicitly wants a different visual style. When the user provides a short-video share link or copied share text, first read the visible/shared video information, then search the web for related materials, and then generate content in the requested output form.
 ---
 
 # yu-article-skill
