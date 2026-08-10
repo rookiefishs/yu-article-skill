@@ -4,7 +4,7 @@
 
 这里现在分成两层：
 - 根目录：放工作区级文档
-- `skill/`：放真正给 Claude 使用的 skill 核心内容
+- `skill/`：放真正给 Agent 使用的 skill 核心内容
 
 ## 当前结构
 
@@ -32,7 +32,7 @@ yu-article-skill/
 - `.git/`：仓库元数据
 
 ### skill/
-这是 skill 的真正核心目录，只放 Claude 执行时需要的内容：
+这是 skill 的真正核心目录，只放 Agent 执行时需要的内容：
 - `SKILL.md`：skill 主入口与规则总览
 - `agents/`：界面元数据
 - `assets/`：默认模板、封面参考图、配图参考图

@@ -1,6 +1,10 @@
 ﻿# -*- coding: utf-8 -*-
 from pathlib import Path
-import subprocess, json, textwrap, sys
+import json
+import os
+import subprocess
+import sys
+import textwrap
 
 ROOT = Path(__file__).resolve().parent
 ARTICLE_ROOT = ROOT.parent
@@ -10,9 +14,26 @@ ASSETS.mkdir(exist_ok=True)
 TTS_PROVIDER = 'xiaomi-mimo'
 TTS_MODEL = 'mimo-v2.5-tts'
 TTS_VOICE = '冰糖'
-TTS_SCRIPT = Path(r'E:\project\个人skill\yu-article-skill\skill\scripts\mimo-tts-bingtang.py')
 TTS_STYLE = '中文科技短视频旁白，清晰、自然、口语化，语速略快但不要急，避免播音腔。'
 PREVIEW_TRANSITION_START = 1.68
+
+
+def resolve_tts_script():
+    candidates = []
+    configured = os.environ.get('YU_ARTICLE_TTS_SCRIPT')
+    if configured:
+        candidates.append(Path(configured))
+    codex_home = Path(os.environ.get('CODEX_HOME', Path.home() / '.codex'))
+    candidates.extend([
+        ROOT.parent.parent / 'scripts' / 'mimo-tts-bingtang.py',
+        codex_home / 'skills' / 'yu-article-skill' / 'scripts' / 'mimo-tts-bingtang.py',
+    ])
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    raise SystemExit(
+        'Missing MiMo TTS script. Set YU_ARTICLE_TTS_SCRIPT or install yu-article-skill.'
+    )
 
 # 替换为实际视频内容
 SCENES = [
@@ -119,12 +140,11 @@ def voice_text(scene):
     return scene.get('voice', '').strip()
 
 def synth_full_narration(voice_file, path):
-    if not TTS_SCRIPT.exists():
-        raise SystemExit(f'Missing MiMo TTS script: {TTS_SCRIPT}')
+    tts_script = resolve_tts_script()
     wav_path = ASSETS / 'narration-mimo-bingtang.wav'
     subprocess.run([
         sys.executable,
-        str(TTS_SCRIPT),
+        str(tts_script),
         '--input',
         str(voice_file),
         '--output',

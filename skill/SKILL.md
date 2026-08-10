@@ -1,7 +1,7 @@
 ---
 name: yu-article-skill
 description: >-
-  Create content production outputs for 长文、图文、视频 in a consistent AI 编程内容风格. Use when the user wants topic planning, preview drafting, 正文 writing, 封面提示词, 配图提示词, 视频大纲, 配音文本, or structured content directories. If the user has not specified the output form, default to 长文. If the user chooses 视频 and does not provide a visual direction, use the built-in default video spec in this skill: 浅色简约、紫蓝渐变、整页滑动转场、统一页面壳； only ask follow-up questions when the user explicitly wants a different visual style. When the user provides a short-video share link or copied share text, first read the visible/shared video information, then search the web for related materials, and then generate content in the requested output form.
+  Use when creating or revising 长文、图文、视频内容, topic plans, preview drafts, 正文, 封面提示词, 配图提示词, 视频大纲, 配音文本, or structured content directories in a consistent AI 编程内容风格.
 ---
 
 # yu-article-skill
@@ -24,7 +24,7 @@ description: >-
 3. 视频默认控制在 1 分钟左右；除非用户明确要求长视频，最好不要超过 2 分钟。
 4. 视频相关源文件统一放进`素材文件/`，最终成片直接放文章根目录。
 5. 视频工程默认从`assets/video-template/`复制，不要临时重新搭一套新模板；用户明确指定`2号视频规范`、`2号视频模板`或`4:3视频模板`时，改用`assets/video-template-2-4x3/`。
-6. 视频配音默认使用小米 MiMo `冰糖` 音色，按 `references/tts-rules.md` 生成无标点、无格式符号、用空白隔开的整条纯文本旁白；微软 TTS 只作为明确指定或降级备用路线。
+6. 视频配音默认使用小米 MiMo `冰糖` 音色，按 `references/tts-rules.md` 生成无标点、无格式符号、用空白隔开的整条纯文本旁白；不要自动降级到未经验证的第三方 TTS。
 7. 视频排版、边距、颜色、转场、预览方式，统一遵守：
    - `references/output-video.md`
    - `references/video-production-workflow.md`
@@ -65,7 +65,7 @@ description: >-
 - `references/output-video.md`：视频结构、边距、配色、转场规则
 - `references/output-video-2-4x3.md`：2号视频规范，4:3 横版浅色科技图文风，复用 `assets/video-template-2-4x3/`
 - `references/video-production-workflow.md`：视频落地流程、预览、渲染与验收
-- `references/tts-rules.md`：配音文本与 SSML 规则
+- `references/tts-rules.md`：配音文本与 MiMo TTS 规则
 - `references/video-assets-rules.md`：视频素材准备规则
 - `references/style-rules.md`：通用写作风格规则
 - `references/platform-safety.md`：平台安全边界

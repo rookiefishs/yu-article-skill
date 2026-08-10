@@ -21,8 +21,27 @@ WIDTH = 1440
 HEIGHT = 1080
 FPS = 24
 BASE_DURATION = 58.0
-TTS_SCRIPT = Path(r"E:\project\个人skill\yu-article-skill\skill\scripts\mimo-tts-bingtang.py")
 TTS_STYLE = "中文科技短视频旁白，清晰、自然、口语化，语速略快但不要急。"
+
+
+def resolve_tts_script() -> Path:
+    candidates = []
+    configured = os.environ.get("YU_ARTICLE_TTS_SCRIPT")
+    if configured:
+        candidates.append(Path(configured))
+    codex_home = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex"))
+    candidates.extend(
+        [
+            ROOT.parent.parent / "scripts" / "mimo-tts-bingtang.py",
+            codex_home / "skills" / "yu-article-skill" / "scripts" / "mimo-tts-bingtang.py",
+        ]
+    )
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    raise SystemExit(
+        "Missing MiMo TTS script. Set YU_ARTICLE_TTS_SCRIPT or install yu-article-skill."
+    )
 
 SCENES = [
     {
@@ -93,14 +112,14 @@ def extract_full_voice() -> str:
 def create_audio() -> float:
     narration = ASSETS / "narration.mp3"
     voice_file = SOURCE_DIR / f"{TITLE}-配音文件.md"
-    if TTS_SCRIPT.exists():
-        try:
-            wav = ASSETS / "narration-mimo-bingtang.wav"
-            subprocess.run([sys.executable, str(TTS_SCRIPT), "--input", str(voice_file), "--output", str(wav), "--style", TTS_STYLE], check=True)
-            subprocess.run(["ffmpeg", "-y", "-i", str(wav), "-ar", "44100", "-ac", "2", "-b:a", "192k", str(narration)], check=True)
-            return ffprobe_duration(narration)
-        except Exception as exc:
-            print(f"TTS unavailable, using silent audio: {exc}")
+    try:
+        tts_script = resolve_tts_script()
+        wav = ASSETS / "narration-mimo-bingtang.wav"
+        subprocess.run([sys.executable, str(tts_script), "--input", str(voice_file), "--output", str(wav), "--style", TTS_STYLE], check=True)
+        subprocess.run(["ffmpeg", "-y", "-i", str(wav), "-ar", "44100", "-ac", "2", "-b:a", "192k", str(narration)], check=True)
+        return ffprobe_duration(narration)
+    except Exception as exc:
+        print(f"TTS unavailable, using silent audio: {exc}")
     subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-t", str(TOTAL_DURATION), "-b:a", "192k", str(narration)], check=True)
     return TOTAL_DURATION
 

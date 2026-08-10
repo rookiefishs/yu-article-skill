@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Generate Xiaomi MiMo TTS audio with the Bingtang voice.
-
-The script keeps the existing Azure/Microsoft TTS workflow untouched and offers
-a separate Xiaomi MiMo path for short-video narration.
-"""
+"""Generate Xiaomi MiMo TTS audio with the Bingtang voice."""
 
 from __future__ import annotations
 

@@ -2,10 +2,44 @@ const fs = require('fs');
 const fsp = fs.promises;
 const path = require('path');
 const { execFileSync } = require('child_process');
-const puppeteer = require('C:/Users/王志宇/AppData/Local/npm-cache/_npx/702923228c2ce1e6/node_modules/puppeteer-core');
+
+function loadPuppeteer() {
+  const moduleIds = ['puppeteer', 'puppeteer-core'];
+  if (process.env.CODEX_NODE_MODULES) {
+    moduleIds.push(path.join(process.env.CODEX_NODE_MODULES, 'puppeteer-core'));
+  }
+  for (const moduleId of moduleIds) {
+    try {
+      return require(moduleId);
+    } catch (error) {
+      if (error.code !== 'MODULE_NOT_FOUND') throw error;
+    }
+  }
+  throw new Error('Puppeteer is unavailable. Install puppeteer or set CODEX_NODE_MODULES.');
+}
+
+function findChrome() {
+  const candidates = [
+    process.env.PUPPETEER_EXECUTABLE_PATH,
+    process.env.CHROME_PATH,
+    process.env.PROGRAMFILES && path.join(process.env.PROGRAMFILES, 'Google', 'Chrome', 'Application', 'chrome.exe'),
+    process.env['PROGRAMFILES(X86)'] && path.join(process.env['PROGRAMFILES(X86)'], 'Google', 'Chrome', 'Application', 'chrome.exe'),
+    process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, 'Google', 'Chrome', 'Application', 'chrome.exe'),
+  ].filter(Boolean);
+  return candidates.find(candidate => fs.existsSync(candidate));
+}
+
+const puppeteer = loadPuppeteer();
 
 const ROOT = __dirname;
 const ARTICLE_ROOT = path.dirname(ROOT);
+function topicFromDir(dir) {
+  return path.basename(dir)
+    .replace(/^待\d*[-_ ]*/, '')
+    .replace(/^\d+[-_ ]*/, '')
+    .replace(/[\\/:*?"<>|]/g, '')
+    .trim() || 'output-video';
+}
 const FPS = 24;
 const WIDTH = 1440;
 const HEIGHT = 1080;
@@ -16,7 +50,7 @@ const RENDER_SECONDS = PREVIEW_SECONDS > 0 ? Math.min(TOTAL, PREVIEW_SECONDS) : 
 const FRAME_COUNT = Math.ceil(RENDER_SECONDS * FPS);
 const FRAMES_DIR = path.join(ROOT, 'renders', 'frames');
 const OUTPUT_DIR = path.join(ROOT, 'renders');
-const FINAL_MP4 = path.join(ARTICLE_ROOT, 'Skills推荐第1期：这个Skill让你的AI变成顶级工程师.mp4');
+const FINAL_MP4 = path.join(ARTICLE_ROOT, `${topicFromDir(ARTICLE_ROOT)}.mp4`);
 const COMPAT_OUTPUT_MP4 = path.join(OUTPUT_DIR, 'output-video.mp4');
 const PREVIEW_MP4 = path.join(OUTPUT_DIR, `preview-${String(RENDER_SECONDS).replace('.', '_')}s.mp4`);
 const OUTPUT_PREVIEW = path.join(OUTPUT_DIR, 'preview-frame-001.jpg');
@@ -29,12 +63,14 @@ const INDEX = `file:///${path.join(ROOT, 'index.html').replace(/\\/g, '/')}`;
     if (file.endsWith('.jpg')) await fsp.unlink(path.join(FRAMES_DIR, file));
   }
 
-  const browser = await puppeteer.launch({
+  const launchOptions = {
     headless: 'new',
-    executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
     defaultViewport: { width: WIDTH, height: HEIGHT, deviceScaleFactor: 1 },
     args: ['--allow-file-access-from-files', '--autoplay-policy=no-user-gesture-required']
-  });
+  };
+  const chromePath = findChrome();
+  if (chromePath) launchOptions.executablePath = chromePath;
+  const browser = await puppeteer.launch(launchOptions);
   const page = await browser.newPage();
   await page.setCacheEnabled(false);
   await page.goto(`${INDEX}?v=${Date.now()}`, { waitUntil: 'load', timeout: 60000 });
